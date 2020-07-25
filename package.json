@@ -9,6 +9,9 @@
     "lint": "eslint .",
     "fix": "eslint --fix ."
   },
+  "bin": {
+    "dev": "./src/bin.js"
+  },
   "keywords": [
     "nix",
     "dev",
