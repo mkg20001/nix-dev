@@ -2,7 +2,19 @@
 
 CLI for managing FHS environments on nixOS
 
-> WIP
+# Getting started
+
+Ever wanted to just get something to run on nixOS, quick and dirty, without the hassle of doing it properly?
+
+Now there's the nix-dev cli
+
+Create an environment using `$ dev add -e test-environment some-package another package`
+
+For example `$ dev add -e headers zlib`
+
+Now you've got an environment named `headers` that includes the zlib binary, library and include files
+
+You can enter it with `$ dev enter zlib` which will spawn your default shell
 
 # Usage
 
