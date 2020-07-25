@@ -75,6 +75,7 @@ let
 in
 (pkgs.buildFHSUserEnv {
   name = "dev-${name}";
+  extraOutputsToInstall = ["include" "dev"]; # TODO: make it saner?
 
   targetPkgs = pkgs: with pkgs; [
     ${storage.value.join('\n  ')}
@@ -126,16 +127,16 @@ function Channels (env) {
   log(`c#${env}: init channels %o`, diskPath)
 
   return {
-    has: (name) => {
+    has: name => {
       log(`c#${env}: has ${name}`)
       return fs.existsSync(path.join(diskPath, name))
     },
-    update: async (name) => {
+    update: async name => {
       log(`c#${env}: update ${name}`)
       const channel = await resolveChannel(name)
       fs.symlinkSync(channel, path.join(diskPath, name))
     },
-    remove: (name) => {
+    remove: name => {
       log(`c#${env}: remove ${name}`)
       rimraf(path.join(diskPath, name))
     },
@@ -169,7 +170,7 @@ async function routineStuff (env, storage, channels) {
   }
 
   const seen = {}
-  const shouldHave = storage.value.map(v => v.split('.')[0]).filter((v) => seen[v] ? false : (seen[v] = true))
+  const shouldHave = storage.value.map(v => v.split('.')[0]).filter(v => seen[v] ? false : (seen[v] = true))
   shouldHave.push('nixpkgs')
 
   channels.list().filter(channel => shouldHave.indexOf(channel) === -1).forEach(channel => {
@@ -179,7 +180,7 @@ async function routineStuff (env, storage, channels) {
 }
 
 require('yargs') // eslint-disable-line
-  .command('add', 'add one or more packages', (yargs) => yargs, async (argv) => {
+  .command('add', 'add one or more packages', yargs => yargs, async argv => {
     const pkgs = argv._.slice(1).map(String)
     const env = argv.e
     const storage = Storage(env)
@@ -235,6 +236,64 @@ require('yargs') // eslint-disable-line
 
     process.exit(hadErrors ? 1 : 0)
   })
+  .command('rm', 'remove one or more packages', yargs => yargs, async argv => {
+    const pkgs = argv._.slice(1).map(String)
+    const env = argv.e
+    const storage = Storage(env)
+    const channels = Channels(env)
+
+    log(`${env}: adding pkgs...`)
+
+    let hadErrors = true
+
+    for (let i = 0; i < pkgs.length; i++) {
+      let pkg = pkgs[i]
+
+      try {
+        if (storage.value.indexOf(pkg) !== -1) {
+          log(`${env}@${pkg}: wasnt found, try prefix`)
+          if (storage.value.indexOf(`nixpkgs.${pkg}`) !== -1) {
+            log(`${env}@${pkg}: giving up`)
+            console.log(`${pkg}: not installed`)
+            continue
+          } else {
+            log(`${env}@${pkg}: prefixed!`)
+            pkg = `nixpkgs.${pkg}`
+          }
+        }
+
+        storage.value = storage.value.filter(curPkg => curPkg !== pkg)
+      } catch (error) {
+        console.error(`${pkg}: ${String(error)}`)
+        hadErrors = true
+      }
+
+      await routineStuff(env, storage, channels)
+
+      log(`${env}: writing storage...`)
+      storage.write()
+
+      if (argv.r) {
+        await rebuild(env, storage, channels)
+      }
+    }
+
+    process.exit(hadErrors ? 1 : 0)
+  })
+  .command('rebuild [env]', 'rebuild an environment', yargs => yargs, async argv => {
+    const env = argv.e
+    const storage = Storage(env)
+    const channels = Channels(env)
+
+    if (storage.isNew) {
+      console.error('Environment does not exist, please create it by adding packages')
+      console.error(` $ dev add${env === 'default' ? '' : ' -e ' + env} <package>`)
+      process.exit(1)
+    }
+
+    await routineStuff(env, storage, channels)
+    await rebuild(env, storage, channels)
+  })
   .command('enter [env]', 'enter an environment', yargs => yargs, async argv => {
     const env = argv.e
     const storage = Storage(env)
@@ -255,6 +314,7 @@ require('yargs') // eslint-disable-line
         process.exit(1)
       }
 
+      await routineStuff(env, storage, channels)
       await rebuild(env, storage, channels)
     }
 
