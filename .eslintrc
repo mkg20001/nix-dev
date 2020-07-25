@@ -1,0 +1,9 @@
+{
+  "extends": [
+    "oclif",
+    "aegir-standalone"
+  ],
+  "rules": {
+    "no-await-in-loop": "off"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "name": "nix-dev",
+  "version": "0.0.1",
+  "description": "The dev cli for managing FHS environments on nixOS",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha -A",
+    "cov": "nyc mocha",
+    "lint": "eslint .",
+    "fix": "eslint --fix ."
+  },
+  "keywords": [
+    "nix",
+    "dev",
+    "fhs",
+    "buildFHSUserEnv",
+    "nixos"
+  ],
+  "template": {
+    "extends": [
+      "node",
+      "eslint"
+    ]
+  },
+  "author": "Maciej Krüger <mkg20001@gmail.com>",
+  "license": "MPL-2.0",
+  "dependencies": {
+    "bl": "^4.0.2",
+    "debug": "^4.1.1",
+    "mkdirp": "^1.0.4",
+    "rimraf": "^3.0.2",
+    "yargs": "^15.4.1"
+  },
+  "devDependencies": {
+    "eslint": "*",
+    "eslint-config-aegir-standalone": "*",
+    "eslint-config-oclif": "*",
+    "mkgs-tool": "^0.1.9",
+    "mocha": "*",
+    "nyc": "*"
+  }
+}
