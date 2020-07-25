@@ -7,18 +7,18 @@ CLI for managing FHS environments on nixOS
 # Usage
 
 ```
-bin.js <command>
-
 Commands:
-  bin.js add          add one or more packages
-  bin.js enter [env]  enter an environment
+  dev add [pkgs..]   add one or more packages
+  dev rm [pkgs..]    remove one or more packages
+  dev rebuild [env]  rebuild an environment
+  dev update [env]   update an environment
+  dev enter [env]    enter an environment                              [default]
 
 Options:
-  --help         Show help                                             [boolean]
   --version      Show version number                                   [boolean]
   --env, -e      Environment to use                [string] [default: "default"]
   --rebuild, -r  Rebuild automatically (disable: --no-rebuild)
                                                        [boolean] [default: true]
   --verbose, -v  Run with verbose logging                              [boolean]
+  --help         Show help                                             [boolean]
 ```
-

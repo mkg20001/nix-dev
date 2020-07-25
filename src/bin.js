@@ -20,7 +20,7 @@ mkdirp(CACHE)
 mkdirp(CONFIG)
 
 const spawn = (cmd, args, catchStdio, channels, ignoreFail) => new Promise((resolve, reject) => {
-  const opt = [cmd, args, { stdio: catchStdio ? 'pipe' : 'inherit', env: { NIX_PATH: channels ? channels.getNixPath() : process.env.NIX_PATH } }]
+  const opt = [cmd, args, { stdio: catchStdio ? 'pipe' : 'inherit', env: { NIX_PATH: channels ? channels.getNixPath() : process.env.NIX_PATH, PATH: process.env.PATH, HOME: process.env.HOME } }]
   log('spawn %o', opt)
   const p = cp.spawn(...opt)
 
@@ -134,6 +134,7 @@ function Channels (env) {
     update: async name => {
       log(`c#${env}: update ${name}`)
       const channel = await resolveChannel(name)
+      rimraf(path.join(diskPath, name))
       fs.symlinkSync(channel, path.join(diskPath, name))
     },
     remove: name => {
@@ -180,8 +181,9 @@ async function routineStuff (env, storage, channels) {
 }
 
 require('yargs') // eslint-disable-line
-  .command('add', 'add one or more packages', yargs => yargs, async argv => {
-    const pkgs = argv._.slice(1).map(String)
+  .scriptName('dev')
+  .command('add [pkgs..]', 'add one or more packages', yargs => yargs, async argv => {
+    const pkgs = argv.pkgs
     const env = argv.e
     const storage = Storage(env)
     const channels = Channels(env)
@@ -236,8 +238,8 @@ require('yargs') // eslint-disable-line
 
     process.exit(hadErrors ? 1 : 0)
   })
-  .command('rm', 'remove one or more packages', yargs => yargs, async argv => {
-    const pkgs = argv._.slice(1).map(String)
+  .command('rm [pkgs..]', 'remove one or more packages', yargs => yargs, async argv => {
+    const pkgs = argv.pkgs
     const env = argv.e
     const storage = Storage(env)
     const channels = Channels(env)
@@ -294,7 +296,35 @@ require('yargs') // eslint-disable-line
     await routineStuff(env, storage, channels)
     await rebuild(env, storage, channels)
   })
-  .command('enter [env]', 'enter an environment', yargs => yargs, async argv => {
+  .command('update [env]', 'update an environment', yargs => yargs.options('fetch', {
+    type: 'boolean',
+    alias: 'f',
+    description: 'Fetch channels before updating',
+    default: false
+  }), async argv => {
+    const env = argv.e
+    const storage = Storage(env)
+    const channels = Channels(env)
+
+    if (storage.isNew) {
+      console.error('Environment does not exist, please create it by adding packages')
+      console.error(` $ dev add${env === 'default' ? '' : ' -e ' + env} <package>`)
+      process.exit(1)
+    }
+
+    await routineStuff(env, storage, channels)
+
+    if (argv.fetch) {
+      await spawn('nix-channel', ['--update', '-vv'], false)
+    }
+
+    await Promise.all(channels.list().map(channel => channels.update(channel)))
+
+    if (argv.r) {
+      await rebuild(env, storage, channels)
+    }
+  })
+  .command(['enter [env]', '$0'], 'enter an environment', yargs => yargs, async argv => {
     const env = argv.e
     const storage = Storage(env)
     const channels = Channels(env)
@@ -338,20 +368,10 @@ require('yargs') // eslint-disable-line
     description: 'Rebuild automatically (disable: --no-rebuild)',
     default: true
   })
-  /* .command('serve [port]', 'start the server', (yargs) => {
-    yargs
-      .positional('port', {
-        describe: 'port to bind on',
-        default: 5000
-      })
-  }, (argv) => {
-    if (argv.verbose) console.info(`start server on :${argv.port}`)
-    serve(argv.port)
-  }) */
   .option('verbose', {
     alias: 'v',
     type: 'boolean',
     description: 'Run with verbose logging'
   })
-  .demand(1)
+  .help()
   .argv
