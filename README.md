@@ -14,7 +14,7 @@ For example `$ dev add -e headers zlib`
 
 Now you've got an environment named `headers` that includes the zlib binary, library and include files
 
-You can enter it with `$ dev enter zlib` which will spawn your default shell
+You can enter it with `$ dev enter headers` which will spawn your default shell
 
 # Usage
 
