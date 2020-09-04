@@ -305,25 +305,41 @@ require('yargs') // eslint-disable-line
     alias: 'f',
     description: 'Fetch channels before updating',
     default: false
+  }).options('all', {
+    type: 'boolean',
+    alias: 'a',
+    description: 'Update all existing environments',
+    default: false
   }), async argv => {
-    const env = argv.e
-    const storage = Storage(env)
-    const channels = Channels(env)
+    async function update (env) {
+      const storage = Storage(env)
+      const channels = Channels(env)
 
-    if (storage.isNew) {
-      return envNotFound(env)
+      if (storage.isNew) {
+        return envNotFound(env)
+      }
+
+      await routineStuff(env, storage, channels)
+
+      await Promise.all(channels.list().map(channel => channels.update(channel)))
+
+      if (argv.r) {
+        await rebuild(env, storage, channels)
+      }
     }
-
-    await routineStuff(env, storage, channels)
 
     if (argv.fetch) {
       await spawn('nix-channel', ['--update', '-vv'], false)
     }
 
-    await Promise.all(channels.list().map(channel => channels.update(channel)))
+    if (argv.a) {
+      const envs = fs.readdirSync(CONFIG).filter(dir => dir.startsWith('env.')).map(env => env.replace(/^env\./, ''))
 
-    if (argv.r) {
-      await rebuild(env, storage, channels)
+      for (let i = 0; i < envs.length; i++) {
+        await update(envs[i])
+      }
+    } else {
+      await update(argv.e)
     }
   })
   .command('info [env]', 'print infos about an environment', yargs => yargs.options('json', {
