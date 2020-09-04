@@ -326,6 +326,43 @@ require('yargs') // eslint-disable-line
       await rebuild(env, storage, channels)
     }
   })
+  .command('info [env]', 'print infos about an environment', yargs => yargs.options('json', {
+    type: 'boolean',
+    alias: 'j',
+    description: 'Print info in JSON',
+    default: false
+  }), async argv => {
+    const env = argv.e
+    const storage = Storage(env)
+    const channels = Channels(env)
+
+    if (storage.isNew) {
+      return envNotFound(env)
+    }
+
+    const channelList = channels.list()
+    const packageList = storage.value
+
+    function printList (title, list) {
+      if (!list.length) list = ['<empty>']
+
+      console.log(`${title}:
+ - ${list.join('\n - ')}`)
+    }
+
+    if (argv.j) {
+      console.log(JSON.stringify({
+        channelList,
+        packageList
+      }))
+    } else {
+      console.log('Environment ' + JSON.stringify(env))
+      console.log()
+      printList('Channels', channelList)
+      console.log()
+      printList('Packages', packageList)
+    }
+  })
   .command(['enter [env]', '$0'], 'enter an environment', yargs => yargs, async argv => {
     const env = argv.e
     const storage = Storage(env)
