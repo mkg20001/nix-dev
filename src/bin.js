@@ -135,7 +135,7 @@ function Channels (env) {
       log(`c#${env}: update ${name}`)
       const channel = await resolveChannel(name)
       rimraf(path.join(diskPath, name))
-      fs.symlinkSync(channel, path.join(diskPath, name))
+      await spawn('nix-store', ['--realise', channel, '--indirect', '--add-root', path.join(diskPath, name)], true)
     },
     remove: name => {
       log(`c#${env}: remove ${name}`)
