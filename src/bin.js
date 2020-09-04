@@ -180,6 +180,12 @@ async function routineStuff (env, storage, channels) {
   })
 }
 
+function envNotFound (env) {
+  console.error('Environment does not exist, please create it by adding packages')
+  console.error(` $ dev add${env === 'default' ? '' : ' -e ' + env} <package>`)
+  process.exit(1)
+}
+
 require('yargs') // eslint-disable-line
   .scriptName('dev')
   .command('add [pkgs..]', 'add one or more packages', yargs => yargs, async argv => {
@@ -288,9 +294,7 @@ require('yargs') // eslint-disable-line
     const channels = Channels(env)
 
     if (storage.isNew) {
-      console.error('Environment does not exist, please create it by adding packages')
-      console.error(` $ dev add${env === 'default' ? '' : ' -e ' + env} <package>`)
-      process.exit(1)
+      return envNotFound(env)
     }
 
     await routineStuff(env, storage, channels)
@@ -307,9 +311,7 @@ require('yargs') // eslint-disable-line
     const channels = Channels(env)
 
     if (storage.isNew) {
-      console.error('Environment does not exist, please create it by adding packages')
-      console.error(` $ dev add${env === 'default' ? '' : ' -e ' + env} <package>`)
-      process.exit(1)
+      return envNotFound(env)
     }
 
     await routineStuff(env, storage, channels)
@@ -330,9 +332,7 @@ require('yargs') // eslint-disable-line
     const channels = Channels(env)
 
     if (storage.isNew) {
-      console.error('Environment does not exist, please create it by adding packages')
-      console.error(` $ dev add${env === 'default' ? '' : ' -e ' + env} <package>`)
-      process.exit(1)
+      return envNotFound(env)
     }
 
     const bin = path.join(CACHE, env, 'result', 'bin', `dev-${env}`)
