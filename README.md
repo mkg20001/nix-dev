@@ -24,6 +24,7 @@ Commands:
   dev rm [pkgs..]    remove one or more packages
   dev rebuild [env]  rebuild an environment
   dev update [env]   update an environment
+  dev info [env]     print infos about an environment
   dev enter [env]    enter an environment                              [default]
 
 Options:
