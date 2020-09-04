@@ -181,7 +181,7 @@ async function routineStuff (env, storage, channels) {
 }
 
 function envNotFound (env) {
-  console.error('Environment does not exist, please create it by adding packages')
+  console.error(`Environment ${JSON.stringify(env)} does not exist, please create it by adding packages`)
   console.error(` $ dev add${env === 'default' ? '' : ' -e ' + env} <package>`)
   process.exit(1)
 }
