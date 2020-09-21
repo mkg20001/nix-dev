@@ -76,7 +76,7 @@ in
   extraOutputsToInstall = ["include" "dev"]; # TODO: make it saner?
 
   targetPkgs = pkgs: with pkgs; [
-    ${storage.value.join('\n  ')}
+    ${storage.value.map(s => `(${s})`).join('\n  ')}
   ];
 
   multiPkgs = pkgs: with pkgs; [
