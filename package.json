@@ -1,6 +1,6 @@
 {
   "name": "nix-dev",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "The dev cli for managing FHS environments on nixOS",
   "main": "index.js",
   "scripts": {
