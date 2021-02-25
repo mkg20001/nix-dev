@@ -1,7 +1,7 @@
 {
   "extends": [
-    "ipfs",
-    "oclif"
+    "oclif",
+    "ipfs"
   ],
   "rules": {
     "no-await-in-loop": "off"

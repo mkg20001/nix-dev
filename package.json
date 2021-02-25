@@ -28,17 +28,17 @@
   "author": "Maciej Krüger <mkg20001@gmail.com>",
   "license": "MPL-2.0",
   "dependencies": {
-    "bl": "^4.0.3",
-    "debug": "^4.2.0",
+    "bl": "^4.1.0",
+    "debug": "^4.3.1",
     "mkdirp": "^1.0.4",
     "rimraf": "^3.0.2",
-    "yargs": "^16.0.3"
+    "yargs": "^16.2.0"
   },
   "devDependencies": {
     "eslint": "*",
     "eslint-config-aegir-standalone": "*",
     "eslint-config-oclif": "*",
-    "mkgs-tool": "^0.1.12",
+    "mkgs-tool": "^0.1.14",
     "mocha": "*",
     "nyc": "*",
     "eslint-config-ipfs": "*"

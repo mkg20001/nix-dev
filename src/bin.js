@@ -14,6 +14,8 @@ const CONFIG = path.join(HOME, '.config', 'dev')
 const debug = require('debug')
 const log = debug('nix-dev')
 
+const flakes = !(cp.spawnSync('nix', ['flake', '--help']).status) // if flake --help exits cleanly all is good
+
 mkdirp(CACHE)
 mkdirp(CONFIG)
 
@@ -53,7 +55,7 @@ async function checkIfPackageExists(attr, channels) {
 }
 
 async function resolveChannel(channelName) {
-  const res = await spawn('nix', ['eval', '--raw', `(<${channelName}>)`], true)
+  const res = await spawn('nix', ['eval', '--raw', ...(flakes ? ['--impure', '--expr'] : []), `(<${channelName}>)`], true)
   const p = res.stdout.trim()
 
   if (!p.startsWith('/')) {
