@@ -84,6 +84,11 @@ in
   multiPkgs = pkgs: with pkgs; [
   ];
 
+  profile = ''
+    export IS_DEV=1
+    export DEV_ENV="${name}"
+  '';
+
   runScript = ''$SHELL'';
 })`
 }
